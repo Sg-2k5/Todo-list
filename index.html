@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Todo-app</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="logo-area">
+        <img
+          src="https://www.svgrepo.com/show/422566/business-management-todolist.svg"
+          alt="todo-icon"
+          width="40px"
+          height="40px"
+        />
+      </div>
+      <div class="heading">
+        <h1>Todo List</h1>
+      </div>
+    </header>
+    <!-- <section class="category">
+      <span class="category-completed">completed</span>
+      <span class="category-pending">pending</span>
+    </section> -->
+    <div class="add-task-form-overlay">
+      <div class="task-modal">
+        <div class="form-header">
+          <h3>Add New Task</h3>
+          <button type="button" class="btn-close">&times;</button>
+        </div>
+        <form id="task-form">
+          <div class="form-group">
+            <label for="task-title">Task Title *</label>
+            <input
+              type="text"
+              id="task-title"
+              placeholder="Task that are needed to be done"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="task-desc">Description (Optional)</label>
+            <textarea
+              id="task-desc"
+              placeholder="Description"
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-submit">Save Task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <main class="content">
+      <section class="tasks">
+        <h2>Tasks</h2>
+        <button class="add-task-button" type="button">Add task</button>
+      </section>
+
+      <div class="task-card">
+        <label class="task-checkbox">
+          <input type="checkbox" />
+          <span class="checkmark"></span>
+        </label>
+        <div class="task-card-content">
+          <div class="task-card-heading">
+            <h3>Finish homework and classwork</h3>
+          </div>
+          <p>maths trigonometry hw,schools cw</p>
+        </div>
+        <div class="task-actions">
+          <button class="task-action edit-action" type="button">Edit</button>
+          <button class="task-action delete-action" type="button">
+            Delete
+          </button>
+        </div>
+      </div>
+      <div class="task-card">
+        <label class="task-checkbox">
+          <input type="checkbox" />
+          <span class="checkmark"></span>
+        </label>
+        <div class="task-card-content">
+          <div class="task-card-heading">
+            <h3>Finish homework and classwork</h3>
+          </div>
+          <p>maths trigonometry hw,schools cw</p>
+        </div>
+        <div class="task-actions">
+          <button class="task-action edit-action" type="button">Edit</button>
+          <button class="task-action delete-action" type="button">
+            Delete
+          </button>
+        </div>
+      </div>
+      <div class="task-card">
+        <label class="task-checkbox">
+          <input type="checkbox" />
+          <span class="checkmark"></span>
+        </label>
+        <div class="task-card-content">
+          <div class="task-card-heading">
+            <h3>Finish homework and classwork</h3>
+          </div>
+          <p>maths trigonometry hw,schools cw</p>
+        </div>
+        <div class="task-actions">
+          <button class="task-action edit-action" type="button">Edit</button>
+          <button class="task-action delete-action" type="button">
+            Delete
+          </button>
+        </div>
+      </div>
+      <div class="task-card">
+        <label class="task-checkbox">
+          <input type="checkbox" />
+          <span class="checkmark"></span>
+        </label>
+        <div class="task-card-content">
+          <div class="task-card-heading">
+            <h3>Finish homework and classwork</h3>
+          </div>
+          <p>maths trigonometry hw,schools cw</p>
+        </div>
+        <div class="task-actions">
+          <button class="task-action edit-action" type="button">Edit</button>
+          <button class="task-action delete-action" type="button">
+            Delete
+          </button>
+        </div>
+      </div>
+      <div class="task-card">
+        <label class="task-checkbox">
+          <input type="checkbox" />
+          <span class="checkmark"></span>
+        </label>
+        <div class="task-card-content">
+          <div class="task-card-heading">
+            <h3>Finish homework and classwork</h3>
+          </div>
+          <p>maths trigonometry hw,schools cw</p>
+        </div>
+        <div class="task-actions">
+          <button class="task-action edit-action" type="button">Edit</button>
+          <button class="task-action delete-action" type="button">
+            Delete
+          </button>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
