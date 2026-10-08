@@ -3,10 +3,10 @@
   <head>
     <!-- To do app title -->
     <title>Todo-app</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- To do app title and icon -->
     <header class="topbar">
       <div class="logo-area">
         <img
@@ -20,74 +20,24 @@
         <h1>Todo List</h1>
       </div>
     </header>
-    <!-- <section class="category">
-      <span class="category-completed">completed</span>
-      <span class="category-pending">pending</span>
-    </section> -->
-    <div class="add-task-form-overlay" id="task-overlay">
-      <div class="task-modal">
-        <div class="form-header">
-          <h3>Add New Task</h3>
-          <button type="button" class="btn-close" aria-label="Close task form">
-            &times;
-          </button>
-        </div>
-        <form id="task-form">
-          <input type="hidden" id="task-id" />
-          <div class="form-group">
-            <label for="task-title">Task Title *</label>
-            <input
-              type="text"
-              id="task-title"
-              placeholder="Task that are needed to be done"
-            />
-            <span class="form-error" id="task-title-error"></span>
-          </div>
-          <div class="form-group">
-            <label for="task-desc">Description (Optional)</label>
-            <textarea
-              id="task-desc"
-              placeholder="Description"
-              rows="3"
-            ></textarea>
-          </div>
-          <p class="form-error" id="task-form-error" role="alert"></p>
-          <div class="form-actions">
-            <button type="submit" class="btn-submit">Save Task</button>
-          </div>
-        </form>
-      </div>
+    <div class="add-task-input">
+      <!--adding task container-->
+      <input
+        type="text"
+        id="add-task-text"
+        placeholder="Enter a task"
+      /><!--Input field-->
+      <button type="button" id="add-task-btn">Add task</button
+      ><!--add task button-->
     </div>
-    <main class="content">
-      <section class="tasks">
-        <h2>Tasks</h2>
-        <button class="add-task-button" type="button">Add task</button>
-      </section>
-
-      <nav class="task-filters">
-        <button class="filter-button active" type="button" data-filter="all">
-          All
-        </button>
-        <button class="filter-button" type="button" data-filter="pending">
-          Pending
-        </button>
-        <button class="filter-button" type="button" data-filter="completed">
-          Completed
-        </button>
-      </nav>
-
-      <section class="task-status-section" data-section="pending">
-        <h3>Pending</h3>
-        <div class="task-list" id="pending-tasks"></div>
-        <p class="empty-state" id="pending-empty">No pending tasks.</p>
-      </section>
-
-      <section class="task-status-section" data-section="completed">
-        <h3>Completed</h3>
-        <div class="task-list" id="completed-tasks"></div>
-        <p class="empty-state" id="completed-empty">No completed tasks.</p>
-      </section>
-    </main>
+    <div class="category">
+      <!--parent container for the buttons(all,pending,completed)-->
+      <button class="category-all" type="button">All</button>
+      <button class="category-pending active" type="button">pending</button>
+      <button class="category-completed" type="button">completed</button>
+    </div>
+    <section class="task-list"></section>
     <script src="script.js"></script>
+    <!--connection to js file-->
   </body>
 </html>
