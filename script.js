@@ -2,9 +2,10 @@ const saved_tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 const add_task = document.querySelector("#add-task-btn");
 const task_input = document.querySelector("#add-task-text");
 let task = saved_tasks;
-let selected_category = "all"; /*default status pending*/
-
+let selected_category = "all"; /*default status */
+//Function for timestamp
 function formatTimestamp(timestamp) {
+  //time stamp format
   if (!timestamp) {
     return "";
   }
@@ -19,7 +20,7 @@ function formatTimestamp(timestamp) {
     timeStyle: "short",
   });
 }
-
+//displaying tasks that have been added
 function displaytask(tasklist, category) {
   const task_main_content = document.getElementsByClassName("task-list")[0];
   let task_html = '<h2 id="task-list-title">My tasks</h2>';
@@ -33,10 +34,11 @@ function displaytask(tasklist, category) {
 
     task_html += `<p class="empty-message">${empty_message}</p>`;
   }
-
+  //iterating through the array
   for (const item of tasklist) {
     const completed = item.status === "completed";
     const created_at = formatTimestamp(item.createdAt);
+    const edited_at = formatTimestamp(item.editedAt);
     const completed_at = formatTimestamp(item.completedAt);
 
     task_html += `
@@ -48,6 +50,7 @@ function displaytask(tasklist, category) {
           </label>
           <span class="task-times">
             ${created_at ? `Created: ${created_at}` : ""}
+            ${edited_at ? ` | Edited: ${edited_at}` : ""}
             ${completed_at ? ` | Completed: ${completed_at}` : ""}
           </span>
         </div>
@@ -65,15 +68,16 @@ function displaytask(tasklist, category) {
     .querySelectorAll('input[type="checkbox"]')
     .forEach((checkbox) => {
       checkbox.addEventListener("change", () => {
+        //filtering such that if the task is selected then it goes to completed, else pending category.
         const task_id = checkbox.closest(".task-item").id;
-        const task_item = task.find((item) => String(item.id) === task_id);
+        const task_item = task.find((item) => item.id == task_id);
 
         if (!task_item) {
           return;
         }
 
-        task_item.status = checkbox.checked ? "completed" : "pending";
-        task_item.completedAt = checkbox.checked
+        task_item.status = checkbox.checked ? "completed" : "pending"; //if checkbox checked it goes to completed
+        task_item.completedAt = checkbox.checked //time at which the task was completed
           ? new Date().toISOString()
           : null;
         localStorage.setItem("tasks", JSON.stringify(task));
@@ -82,7 +86,11 @@ function displaytask(tasklist, category) {
     });
 
   task_main_content.querySelectorAll(".edit-task").forEach((edit_button) => {
+    //edit task
     edit_button.addEventListener("click", () => {
+      if (selected_category === "completed") {
+        return;
+      }
       const task_id = edit_button.closest(".task-item").id;
       const task_item = task.find((item) => String(item.id) === task_id);
 
@@ -93,17 +101,17 @@ function displaytask(tasklist, category) {
       const task_row = edit_button.closest(".task-item");
       const description = task_row.querySelector(".description");
       const actions = task_row.querySelector(".task-actions");
-
-      description.outerHTML = `
-        <input class="edit-input" type="text" value="">
+      //changing task into an input field
+      description.innerHTML = `
+        <input class="edit-input" type="text" >
       `;
-      task_row.querySelector(".edit-input").value = task_item.text;
+      description.querySelector(".edit-input").value = task_item.text;
       actions.innerHTML = `
         <button class="save-task" type="button">save</button>
         <button class="cancel-edit" type="button">cancel</button>
       `;
 
-      const edit_input = task_row.querySelector(".edit-input");
+      const edit_input = task_row.querySelector(".edit-input"); //edit input
       edit_input.focus();
 
       task_row.querySelector(".save-task").addEventListener("click", () => {
@@ -114,12 +122,14 @@ function displaytask(tasklist, category) {
         }
 
         task_item.text = updated_text;
+        task_item.editedAt = new Date().toISOString();
+        task_item.createdAt = null;
         localStorage.setItem("tasks", JSON.stringify(task));
-        showtasks(selected_category);
+        showtasks(selected_category); //task can be edited for both all,pending and completed category
       });
 
       task_row.querySelector(".cancel-edit").addEventListener("click", () => {
-        showtasks(selected_category);
+        showtasks(selected_category); //edit is cancelled
       });
     });
   });
@@ -127,16 +137,18 @@ function displaytask(tasklist, category) {
   task_main_content
     .querySelectorAll(".delete-task")
     .forEach((delete_button) => {
+      /*delete operation*/
       delete_button.addEventListener("click", () => {
         const task_id = delete_button.closest(".task-item").id;
         task = task.filter((item) => String(item.id) !== task_id);
         localStorage.setItem("tasks", JSON.stringify(task));
-        showtasks(selected_category);
+        showtasks(selected_category); //deletion for all,pending and completed categories.
       });
     });
 }
 
 function addTask() {
+  /*add tasks*/
   selected_category = "pending";
   const text = task_input.value.trim();
 
@@ -145,10 +157,11 @@ function addTask() {
   }
 
   task.push({
-    id: Date.now().toString(),
+    id: Date.now(),
     text,
     status: "pending" /*task pushed by default is pending*/,
     createdAt: new Date().toISOString(),
+    editedAt: null,
     completedAt: null,
   });
 
@@ -158,6 +171,7 @@ function addTask() {
 }
 
 function showtasks(category) {
+  /*filter by pending or completed tasks*/
   selected_category = category;
 
   document.querySelectorAll(".category button").forEach((button) => {
@@ -198,4 +212,6 @@ document.querySelector(".category-completed").addEventListener("click", () => {
   showtasks("completed"); /*Show completed tasks*/
 });
 
-showtasks(selected_category); /*show tasks based on selected category*/
+showtasks(
+  selected_category,
+); /*show tasks based on selected category that has been defined in the selected category*/
