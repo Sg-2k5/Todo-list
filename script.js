@@ -1,7 +1,7 @@
-const saved_tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 const add_task = document.querySelector("#add-task-btn");
 const task_input = document.querySelector("#add-task-text");
-let task = saved_tasks;
+
+let task = [];
 let selected_category = "all"; /*default status */
 //Function for timestamp
 function formatTimestamp(timestamp) {
@@ -38,7 +38,7 @@ function displaytask(tasklist, category) {
   for (const item of tasklist) {
     const completed = item.status === "completed";
     const created_at = formatTimestamp(item.createdAt);
-    const edited_at = formatTimestamp(item.editedAt);
+    // const edited_at = formatTimestamp(item.editedAt);
     const completed_at = formatTimestamp(item.completedAt);
 
     task_html += `
@@ -50,7 +50,6 @@ function displaytask(tasklist, category) {
           </label>
           <span class="task-times">
             ${created_at ? `Created: ${created_at}` : ""}
-            ${edited_at ? ` | Edited: ${edited_at}` : ""}
             ${completed_at ? ` | Completed: ${completed_at}` : ""}
           </span>
         </div>
@@ -67,21 +66,39 @@ function displaytask(tasklist, category) {
   task_main_content
     .querySelectorAll('input[type="checkbox"]')
     .forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        //filtering such that if the task is selected then it goes to completed, else pending category.
+      checkbox.addEventListener("change", async () => {
         const task_id = checkbox.closest(".task-item").id;
-        const task_item = task.find((item) => item.id == task_id);
+        const status = checkbox.checked ? "completed" : "pending";
 
-        if (!task_item) {
-          return;
+        try {
+          const response = await fetch(
+            //checkbox (whether the the task is compelted or not)
+            `http://localhost:3000/api/tasks/${task_id}/status`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ status }),
+            },
+          );
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Failed to update task status");
+          }
+
+          const updated_tasks = await fetch("http://localhost:3000/api/tasks");
+          if (!updated_tasks.ok) {
+            throw new Error("Failed to reload tasks");
+          }
+
+          task = await updated_tasks.json();
+          showtasks(selected_category);
+        } catch (error) {
+          checkbox.checked = !checkbox.checked;
+          console.error(error);
         }
-
-        task_item.status = checkbox.checked ? "completed" : "pending"; //if checkbox checked it goes to completed
-        task_item.completedAt = checkbox.checked //time at which the task was completed
-          ? new Date().toISOString()
-          : null;
-        localStorage.setItem("tasks", JSON.stringify(task));
-        showtasks(selected_category);
       });
     });
 
@@ -114,19 +131,38 @@ function displaytask(tasklist, category) {
       const edit_input = task_row.querySelector(".edit-input"); //edit input
       edit_input.focus();
 
-      task_row.querySelector(".save-task").addEventListener("click", () => {
-        const updated_text = edit_input.value.trim();
+      task_row
+        .querySelector(".save-task")
+        .addEventListener("click", async () => {
+          const updated_text = edit_input.value.trim();
 
-        if (updated_text === "") {
-          return;
-        }
+          if (updated_text === "") {
+            return;
+          }
 
-        task_item.text = updated_text;
-        task_item.editedAt = new Date().toISOString();
-        task_item.createdAt = null;
-        localStorage.setItem("tasks", JSON.stringify(task));
-        showtasks(selected_category); //task can be edited for both all,pending and completed category
-      });
+          try {
+            const response = await fetch(
+              `http://localhost:3000/api/tasks/${task_id}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ text: updated_text }),
+              },
+            );
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || "Failed to update task");
+            }
+
+            await gettask();
+          } catch (error) {
+            console.error(error);
+            window.alert(error.message);
+          }
+        });
 
       task_row.querySelector(".cancel-edit").addEventListener("click", () => {
         showtasks(selected_category); //edit is cancelled
@@ -138,36 +174,79 @@ function displaytask(tasklist, category) {
     .querySelectorAll(".delete-task")
     .forEach((delete_button) => {
       /*delete operation*/
-      delete_button.addEventListener("click", () => {
+      delete_button.addEventListener("click", async () => {
         const task_id = delete_button.closest(".task-item").id;
-        task = task.filter((item) => String(item.id) !== task_id);
-        localStorage.setItem("tasks", JSON.stringify(task));
-        showtasks(selected_category); //deletion for all,pending and completed categories.
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/tasks/${task_id}`,
+            {
+              method: "DELETE",
+            },
+          );
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to delete task");
+          }
+
+          await gettask();
+        } catch (error) {
+          console.error(error);
+        }
       });
     });
 }
 
-function addTask() {
-  /*add tasks*/
-  selected_category = "pending";
+async function addtask() {
   const text = task_input.value.trim();
 
   if (text === "") {
     return;
   }
 
-  task.push({
-    id: Date.now(),
-    text,
-    status: "pending" /*task pushed by default is pending*/,
-    createdAt: new Date().toISOString(),
-    editedAt: null,
-    completedAt: null,
-  });
+  try {
+    const response = await fetch("http://localhost:3000/api/tasks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+    });
 
-  localStorage.setItem("tasks", JSON.stringify(task));
-  task_input.value = "";
-  showtasks(selected_category);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to add task");
+    }
+
+    const tasks_response = await fetch("http://localhost:3000/api/tasks");
+    if (!tasks_response.ok) {
+      throw new Error("Task was added, but the list could not be refreshed");
+    }
+
+    task = await tasks_response.json();
+    task_input.value = "";
+    selected_category = "pending";
+    showtasks(selected_category);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function gettask() {
+  try {
+    const response = await fetch("http://localhost:3000/api/tasks");
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    task = await response.json();
+    showtasks(selected_category);
+  } catch (error) {
+    console.error("Fetch failed:", error.message);
+  }
 }
 
 function showtasks(category) {
@@ -191,12 +270,12 @@ function showtasks(category) {
 
 add_task.addEventListener(
   "click",
-  addTask,
+  addtask,
 ); /*add the task when button is clicked*/
 
 task_input.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
-    addTask();
+    addtask();
   }
 }); /*add task when enter is clicked*/
 
@@ -211,7 +290,4 @@ document.querySelector(".category-pending").addEventListener("click", () => {
 document.querySelector(".category-completed").addEventListener("click", () => {
   showtasks("completed"); /*Show completed tasks*/
 });
-
-showtasks(
-  selected_category,
-); /*show tasks based on selected category that has been defined in the selected category*/
+gettask();
